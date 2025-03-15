@@ -30,11 +30,35 @@ const GameController = function() {
 
   const getActivePlayer = () => activePlayer;
 
-  const validateSpot = (spot) => 0 < spot < 10;
+  const getSpotIndexes = (spot) => {
+    let row = 0;
+    let column = spot - 1;
+
+    if (4 <= spot && spot <= 6) {
+      row = 1;
+      column = spot - 4;
+    }
+    else if (7 <= spot && spot <= 10) {
+      row = 2;
+      column = spot - 7;
+    }
+    return { row, column };
+
+  };
+
+  const validateSpot = (spot) => {
+    const row = getSpotIndexes(spot).row;
+    const column = getSpotIndexes(spot).column;
+    const board = Game.getBoard();
+
+    if (board[row][column] === 'X' || board[row][column] === 'O')
+      return false;
+    return 0 < spot < 10;
+  };
 
   const playRound = (spot, symbol) => {
-    if (!validateSpot(spot)) return `Spot ${spot} not valid`;
 
+    if (!validateSpot(spot)) return console.log(`Spot ${spot} not valid`);
 
     const newBoard = Game.getBoard();
 
@@ -75,23 +99,27 @@ function createPlayer(name, symbol) {
 Game.displayBoard();
 
 const player1 = createPlayer('player1', 'X');
-player1.playRound(4);
 
-console.info(`${player1.getName()} has chosen`);
+let position = 4;
+console.info(`${player1.getName()} has chosen X in the position ${position}`);
+player1.playRound(position);
+
 
 Game.displayBoard();
 
 const player2 = createPlayer('player2', 'O');
-player2.playRound(9);
-console.info(`${player2.getName()} has chosen`);
+
+position = 9;
+console.info(`${player2.getName()} has chosen O in the position ${position}`);
+player2.playRound(position);
 Game.displayBoard();
 
-player1.playRound(3);
-console.info(`${player1.getName()} has chosen`);
+position = 3;
+console.info(`${player1.getName()} has chosen X in the position ${position}`);
+player1.playRound(position);
 Game.displayBoard();
 
-player2.playRound(2);
-console.info(`${player2.getName()} has chosen`);
+position = 3;
+console.info(`${player2.getName()} has chosen O in the position ${position}`);
+player2.playRound(position);
 Game.displayBoard();
-
-//TODO: Not allow override a taken spot
