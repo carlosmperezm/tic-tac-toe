@@ -76,7 +76,7 @@ const GameController = function() {
 
   };
 
-  const isWinner = () => {
+  const getWinnerSymbol = () => {
     const board = Game.getBoard();
     // Validating lines
     const options = {
@@ -89,14 +89,11 @@ const GameController = function() {
       diagonal1: [board[0][0], board[1][1], board[2][2]],
       diagonal2: [board[2][0], board[1][1], board[0][2]],
     };
-    for (const key in options) {
-      if (checkWinnerInTheLine(options[key])) {
-        console.log(`There was a winner in line: ${options[key]}`);
-      }
-    }
+    for (const key in options)
+      if (checkWinnerInTheLine(options[key])) return options[key][0];
   };
 
-  return { getActivePlayer, playRound, isWinner };
+  return { getActivePlayer, playRound, getWinnerSymbol };
 
 }();
 
@@ -158,5 +155,6 @@ function checkWinnerInTheLine(line) {
 
 }
 
-GameController.isWinner();
+
+
 
