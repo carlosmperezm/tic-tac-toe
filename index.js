@@ -76,8 +76,27 @@ const GameController = function() {
 
   };
 
+  const isWinner = () => {
+    const board = Game.getBoard();
+    // Validating lines
+    const options = {
+      row1: [board[0][0], board[0][1], board[0][2]],
+      row2: [board[1][0], board[1][1], board[1][2]],
+      row3: [board[2][0], board[2][1], board[2][2]],
+      column1: [board[0][0], board[1][0], board[2][0]],
+      column2: [board[0][1], board[1][1], board[2][1]],
+      column3: [board[0][2], board[1][2], board[2][2]],
+      diagonal1: [board[0][0], board[1][1], board[2][2]],
+      diagonal2: [board[2][0], board[1][1], board[0][2]],
+    };
+    for (const key in options) {
+      if (checkWinnerInTheLine(options[key])) {
+        console.log(`There was a winner in line: ${options[key]}`);
+      }
+    }
+  };
 
-  return { getActivePlayer, playRound };
+  return { getActivePlayer, playRound, isWinner };
 
 }();
 
@@ -96,30 +115,48 @@ function createPlayer(name, symbol) {
 }
 
 
-Game.displayBoard();
 
 const player1 = createPlayer('player1', 'X');
 
-let position = 4;
-console.info(`${player1.getName()} has chosen X in the position ${position}`);
+let position = 1;
+player1.playRound(position);
+position = 4;
 player1.playRound(position);
 
 
-Game.displayBoard();
 
 const player2 = createPlayer('player2', 'O');
 
-position = 9;
-console.info(`${player2.getName()} has chosen O in the position ${position}`);
-player2.playRound(position);
-Game.displayBoard();
-
 position = 3;
-console.info(`${player1.getName()} has chosen X in the position ${position}`);
+player2.playRound(position);
+position = 6;
+player2.playRound(position);
+
+position = 7;
 player1.playRound(position);
+
+
+position = 9;
+player2.playRound(position);
+
 Game.displayBoard();
 
-position = 3;
-console.info(`${player2.getName()} has chosen O in the position ${position}`);
-player2.playRound(position);
-Game.displayBoard();
+
+function checkWinnerInTheLine(line) {
+  let index = 0;
+
+  while (line[index] === ' ') {
+    index++;
+  }
+  const symbol = line[index];
+
+
+  for (const content of line)
+    if (content !== symbol) return false;
+
+  return true;
+
+}
+
+GameController.isWinner();
+
