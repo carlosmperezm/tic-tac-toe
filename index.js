@@ -23,13 +23,20 @@ const Game = function() {
 
 //Game Controller
 const GameController = function() {
+  const players = [];
 
-  const players = [
-    createPlayer('player1', 'X'),
-    createPlayer('player2', 'O'),
-  ];
 
-  let activePlayer = players[0];
+  let activePlayer;
+
+  const addPlayers = (player1, player2) => {
+
+    players.push(player1);
+    players.push(player2);
+
+    activePlayer = player1.getSymbol() === 'X' ? player1 : player2;
+
+    console.log(player1.getName());
+  };
 
   const switchPlayerTurn = () => activePlayer = activePlayer === players[0] ? players[1] : players[0];
 
@@ -94,7 +101,7 @@ const GameController = function() {
     Game.updateBoard(spots);
   };
 
-  return { getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner, isTie, resetGame };
+  return { addPlayers, getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner, isTie, resetGame };
 
 }();
 
@@ -138,6 +145,9 @@ const DOMController = function() {
     quitButton.classList.add('quit-button');
     quitButton.textContent = 'Quit';
 
+    const currentPlayer = GameController.getActivePlayer().getName();
+    infoMessage.textContent = `${currentPlayer} turn`;
+
     infoContainer.appendChild(quitButton);
     infoContainer.appendChild(infoMessage);
     infoContainer.appendChild(restartButton);
@@ -165,7 +175,7 @@ const DOMController = function() {
 
   const getInputValue = (inputId) => {
     const input = document.querySelector(`#${inputId}`);
-    return input.nodeValue;
+    return input.value;
   };
 
   const createSpots = () => {
@@ -185,9 +195,9 @@ const DOMController = function() {
   const getBoard = () => board;
 
   const updateInfo = () => {
-    const currentSymbol = GameController.getActivePlayer().getSymbol();
+    const currentPlayer = GameController.getActivePlayer().getName();
     const infoMsg = document.querySelector('.info-msg');
-    infoMsg.textContent = `${currentSymbol} turn`;
+    infoMsg.textContent = `${currentPlayer} turn`;
   };
 
   const createMessage = (message) => {
@@ -233,8 +243,12 @@ const EventHandler = function() {
     const player2Name = DOMController.getInputValue('player2-name');
     const player2Symbol = DOMController.getInputValue('player2-symbols');
 
-    createPlayer(player1Name, player1Symbol);
-    createPlayer(player2Name, player2Symbol);
+    const player1 = createPlayer(player1Name, player1Symbol);
+    const player2 = createPlayer(player2Name, player2Symbol);
+
+    console.log(player1Name);
+
+    GameController.addPlayers(player1, player2);
 
     DOMController.deleteForm();
     DOMController.createBoard();
@@ -268,7 +282,7 @@ const EventHandler = function() {
       activePlayer.playRound(buttonIndex);
 
       if (GameController.isWinner()) {
-        const winMessage = `${GameController.getActivePlayer().getSymbol()} takes the round`;
+        const winMessage = `${GameController.getActivePlayer().getName()} takes the round`;
         DOMController.createMessage(winMessage);
       }
       else if (GameController.isTie()) {
