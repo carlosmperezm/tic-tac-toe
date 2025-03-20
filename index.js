@@ -157,4 +157,12 @@ function checkWinnerInTheLine(line) {
 
 
 
+const board = document.querySelector('.board');
 
+function insertEventHandler(event) {
+  const buttonTarget = event.target;
+  buttonTarget.textContent = 'X';
+
+}
+
+board.addEventListener('click', insertEventHandler);

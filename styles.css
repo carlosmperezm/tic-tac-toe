@@ -1,0 +1,31 @@
+body {
+  background-color: #007;
+}
+
+main {
+  height: 100vh;
+  background-color: Red;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+}
+
+.board {
+  display: grid;
+  gap: 4px;
+  background-color: gray;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 500px;
+  height: 500px;
+  place-self: center;
+}
+
+.board button {
+  font-size: 4rem;
+}
+
+button:hover {
+  cursor: pointer;
+}
