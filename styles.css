@@ -75,8 +75,9 @@ button:hover {
 }
 
 .info-container {
-  position: relative;
-  top: 30px;
+  position: absolute;
+  width: 100vw;
+  top: 10px;
   display: flex;
   justify-content: space-around;
   gap: 3rem;

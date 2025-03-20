@@ -1,5 +1,4 @@
 
-const board = document.querySelector('.board');
 
 
 
@@ -7,11 +6,12 @@ const board = document.querySelector('.board');
 // Game 
 const Game = function() {
 
-  const getBoard = () => document.querySelector('.board');
-  const getSpots = () => getBoard().querySelectorAll('button');
+  const getBoard = () => DOMController.getBoard();
+  const getSpots = () => DOMController.getSpots();
 
   const updateBoard = (newSpots) => {
     getSpots().forEach((element) => element.remove());
+    const board = document.querySelector('.board');
     newSpots.forEach((element) => board.appendChild(element));
   };
 
@@ -37,10 +37,7 @@ const GameController = function() {
 
 
   const validateSpot = (spotIndex) => {
-    // const boardSpots = Game.getSpots();
     const boardSpots = document.querySelectorAll('.board button');
-    console.log(boardSpots[spotIndex]);
-
 
     if (boardSpots[spotIndex].textContent === 'X' || boardSpots[spotIndex].textContent === 'O')
       return false;
@@ -93,13 +90,7 @@ const GameController = function() {
   };
 
   const resetGame = () => {
-    const spots = [];
-
-    for (let i = 0; i < 9; i++) {
-      const button = document.createElement('button');
-      button.dataset.index = i;
-      spots.push(button);
-    }
+    const spots = DOMController.createSpots();
     Game.updateBoard(spots);
   };
 
@@ -125,7 +116,69 @@ function createPlayer(name, symbol) {
 
 
 const DOMController = function() {
+  const board = document.createElement('div');
+  const restartButton = document.createElement('button');
+  const main = document.querySelector('main');
 
+  board.classList.add('board');
+
+  restartButton.classList.add('restart-button');
+
+
+
+  const createInfoElement = () => {
+    const infoContainer = document.createElement('div');
+    const infoMessage = document.createElement('span');
+    const restartButton = document.createElement('button');
+    infoContainer.classList.add('info-container');
+    infoMessage.classList.add('info-msg');
+    restartButton.classList.add('restart-button');
+    restartButton.textContent = 'Restart';
+
+    infoContainer.appendChild(infoMessage);
+    infoContainer.appendChild(restartButton);
+
+    main.appendChild(infoContainer);
+
+  };
+
+
+
+  const deleteForm = () => form.remove();
+
+  const getForm = () => document.querySelector('form');
+
+  const getRestartButton = () => document.querySelector('.restart-button');
+
+  const createBoard = () => {
+    createInfoElement();
+    createSpots().forEach((sport) => board.appendChild(sport));
+    main.appendChild(board);
+  };
+
+  const getSubmitButton = () => form.querySelector('button.start-game');
+
+
+  const getInputValue = (inputId) => {
+    const input = document.querySelector(`#${inputId}`);
+    return input.nodeValue;
+  };
+
+  const createSpots = () => {
+    const buttonList = [];
+    for (let i = 0; i < 9; i++) {
+      const button = document.createElement('button');
+      button.dataset.index = i;
+      buttonList.push(button);
+
+    }
+    return buttonList;
+  };
+
+
+  const getSpots = () => board.querySelectorAll('.board button');
+
+  const getBoard = () => board;
 
   const updateInfo = () => {
     const currentSymbol = GameController.getActivePlayer().getSymbol();
@@ -155,20 +208,48 @@ const DOMController = function() {
 
     document.body.appendChild(messageBackground);
 
-    restartButton.addEventListener('click', eventHandler.resetEventHandler);
+    restartButton.addEventListener('click', EventHandler.resetEventHandler);
 
   };
 
-  return { updateInfo, createMessage };
+
+
+  return { getRestartButton, updateInfo, createMessage, getBoard, createSpots, getSpots, getForm, getInputValue, createBoard, deleteForm, getSubmitButton };
 
 }();
 
-const eventHandler = function() {
+const EventHandler = function() {
+
+  const formEventHandler = (event) => {
+    event.preventDefault();
+
+    const player1Name = DOMController.getInputValue('player1-name');
+    const player1Symbol = DOMController.getInputValue('player1-symbols');
+
+    const player2Name = DOMController.getInputValue('player2-name');
+    const player2Symbol = DOMController.getInputValue('player2-symbols');
+
+    createPlayer(player1Name, player1Symbol);
+    createPlayer(player2Name, player2Symbol);
+
+    DOMController.deleteForm();
+    DOMController.createBoard();
+
+
+  };
 
   const resetEventHandler = (event) => {
-    const messageBackground = document.querySelector('.blur-background');
-    GameController.resetGame();
-    messageBackground.remove();
+    if (event.target.classList.contains('restart-button')) {
+      const messageBackground = document.querySelector('.blur-background');
+      GameController.resetGame();
+      try {
+        messageBackground.remove();
+
+      } catch (e) {
+        console.log('jeje');
+      }
+
+    }
   };
 
   const insertEventHandler = (event) => {
@@ -197,25 +278,17 @@ const eventHandler = function() {
 
   };
 
-  return { insertEventHandler, resetEventHandler };
+  return { insertEventHandler, resetEventHandler, formEventHandler };
 
 }();
 
 
 
+const form = DOMController.getForm();
+
+form.addEventListener('submit', EventHandler.formEventHandler);
 
 
+DOMController.getBoard().addEventListener('click', EventHandler.insertEventHandler);
 
-board.addEventListener('click', eventHandler.insertEventHandler);
-
-
-
-
-
-
-
-
-DOMController.updateInfo();
-
-const restartButton = document.querySelector('.restart-button');
-restartButton.addEventListener('click', eventHandler.resetEventHandler);
+document.body.addEventListener('click', EventHandler.resetEventHandler);
