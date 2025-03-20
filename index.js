@@ -84,6 +84,14 @@ const GameController = function() {
     return false;
   };
 
+  const isTie = () => {
+    const spots = Game.getSpots();
+    for (const spot of spots) {
+      if (spot.textContent === '') return false;
+    }
+    return true;
+  };
+
   const resetGame = () => {
     const spots = [];
 
@@ -95,7 +103,7 @@ const GameController = function() {
     Game.updateBoard(spots);
   };
 
-  return { getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner, resetGame };
+  return { getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner, isTie, resetGame };
 
 }();
 
@@ -127,8 +135,12 @@ function insertEventHandler(event) {
     activePlayer.playRound(buttonIndex);
 
     if (GameController.isWinner()) {
-      createWinnerMessage();
-
+      const winMessage = `${GameController.getActivePlayer().getSymbol()} takes the round`;
+      createMessage(winMessage);
+    }
+    else if (GameController.isTie()) {
+      const tieMessage = 'It\'s a tie';
+      createMessage(tieMessage);
     }
 
     GameController.switchPlayerTurn();
@@ -137,7 +149,6 @@ function insertEventHandler(event) {
   } catch (e) {
     console.log(e);
   }
-
 
 }
 
@@ -163,7 +174,7 @@ function resetEventHandler(event) {
 }
 
 
-function createWinnerMessage() {
+function createMessage(message) {
   const messageBackground = document.createElement('div');
   messageBackground.classList.add('blur-background');
 
@@ -175,7 +186,7 @@ function createWinnerMessage() {
   restartButton.classList.add('restart-button');
 
   const textMessage = document.createElement('span');
-  textMessage.textContent = `${GameController.getActivePlayer().getSymbol()} takes the round`;
+  textMessage.textContent = message;
 
 
   winnerMessage.appendChild(textMessage);
