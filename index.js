@@ -5,20 +5,19 @@ const board = document.querySelector('.board');
 
 
 // Game 
-const Game = function(board) {
-  const spots = board.querySelectorAll('button');
+const Game = function() {
 
-  const getBoard = () => board;
-  const getSpots = () => spots;
+  const getBoard = () => document.querySelector('.board');
+  const getSpots = () => getBoard().querySelectorAll('button');
 
   const updateBoard = (newSpots) => {
-    spots.forEach((element) => element.remove());
+    getSpots().forEach((element) => element.remove());
     newSpots.forEach((element) => board.appendChild(element));
   };
 
   return { getBoard, updateBoard, getSpots };
 
-}(board);
+}();
 
 
 
@@ -38,7 +37,9 @@ const GameController = function() {
 
 
   const validateSpot = (spotIndex) => {
-    const boardSpots = Game.getSpots();
+    // const boardSpots = Game.getSpots();
+    const boardSpots = document.querySelectorAll('.board button');
+    console.log(boardSpots[spotIndex]);
 
 
     if (boardSpots[spotIndex].textContent === 'X' || boardSpots[spotIndex].textContent === 'O')
@@ -84,8 +85,14 @@ const GameController = function() {
   };
 
   const resetGame = () => {
-    const spots = Game.getSpots();
-    spots.forEach((spot) => spot.textContent = '');
+    const spots = [];
+    // spots.forEach((spot) => spot.remove());
+
+    for (let i = 0; i <= 9; i++) {
+      const button = document.createElement('button');
+      button.dataset.index = i;
+      spots.push(button);
+    }
     Game.updateBoard(spots);
   };
 
@@ -122,15 +129,17 @@ function insertEventHandler(event) {
 
     if (GameController.isWinner()) {
       createWinnerMessage();
+
       const restartButton = document.querySelector('.restart-button');
       restartButton.addEventListener('click', resetEventHandler);
 
     }
 
     GameController.switchPlayerTurn();
+    UpdateInfo();
 
   } catch (e) {
-    alert('Choose another spot');
+    console.log(e);
   }
 
 
@@ -140,9 +149,20 @@ function insertEventHandler(event) {
 
 board.addEventListener('click', insertEventHandler);
 
+
+function UpdateInfo() {
+  const currentSymbol = GameController.getActivePlayer().getSymbol();
+  const infoMsg = document.querySelector('.info-msg');
+  infoMsg.textContent = `${currentSymbol} turn`;
+}
+
+
+
 function resetEventHandler(event) {
   const messageBackground = document.querySelector('.blur-background');
+  const infoMsg = document.querySelector('.info-msg');
   GameController.resetGame();
+  infoMsg.textContent = '';
   messageBackground.remove();
 
 
@@ -161,7 +181,7 @@ function createWinnerMessage() {
   restartButton.classList.add('restart-button');
 
   const textMessage = document.createElement('span');
-  textMessage.textContent = `${GameController.getActivePlayer().getName()} has won`;
+  textMessage.textContent = `${GameController.getActivePlayer().getSymbol()} takes the round`;
 
 
   winnerMessage.appendChild(textMessage);

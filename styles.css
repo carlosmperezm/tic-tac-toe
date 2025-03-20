@@ -62,3 +62,9 @@ button:hover {
   height: 40px;
   place-self: center;
 }
+
+.info-container {
+  background-color: red;
+  position: relative;
+  top: 20px;
+}
