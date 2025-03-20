@@ -1,8 +1,4 @@
 
-
-
-
-
 // Game 
 const Game = function() {
 
@@ -146,7 +142,7 @@ const DOMController = function() {
     quitButton.textContent = 'Quit';
 
     const currentPlayer = GameController.getActivePlayer().getName();
-    infoMessage.textContent = `${currentPlayer} turn`;
+    infoMessage.textContent = `${currentPlayer}'s turn`;
 
     infoContainer.appendChild(quitButton);
     infoContainer.appendChild(infoMessage);
@@ -200,7 +196,7 @@ const DOMController = function() {
     infoMsg.textContent = `${currentPlayer} turn`;
   };
 
-  const createMessage = (message) => {
+  const createMessage = (message, eventHandler) => {
     const messageBackground = document.createElement('div');
     messageBackground.classList.add('blur-background');
 
@@ -222,7 +218,7 @@ const DOMController = function() {
 
     document.body.appendChild(messageBackground);
 
-    restartButton.addEventListener('click', EventHandler.resetEventHandler);
+    restartButton.addEventListener('click', eventHandler);
 
   };
 
@@ -246,7 +242,11 @@ const EventHandler = function() {
     const player1 = createPlayer(player1Name, player1Symbol);
     const player2 = createPlayer(player2Name, player2Symbol);
 
-    console.log(player1Name);
+
+    if (player1Symbol === player2Symbol) {
+      DOMController.createMessage('You have to choose different symbols', () => window.history.back());
+      return;
+    }
 
     GameController.addPlayers(player1, player2);
 
@@ -278,16 +278,17 @@ const EventHandler = function() {
     const buttonTarget = event.target;
     const buttonIndex = buttonTarget.dataset.index;
 
+
     try {
       activePlayer.playRound(buttonIndex);
 
       if (GameController.isWinner()) {
         const winMessage = `${GameController.getActivePlayer().getName()} takes the round`;
-        DOMController.createMessage(winMessage);
+        DOMController.createMessage(winMessage, EventHandler.resetEventHandler);
       }
       else if (GameController.isTie()) {
         const tieMessage = 'It\'s a tie';
-        DOMController.createMessage(tieMessage);
+        DOMController.createMessage(tieMessage, EventHandler.resetEventHandler);
       }
 
       GameController.switchPlayerTurn();
