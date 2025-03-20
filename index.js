@@ -83,7 +83,13 @@ const GameController = function() {
     return false;
   };
 
-  return { getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner };
+  const resetGame = () => {
+    const spots = Game.getSpots();
+    spots.forEach((spot) => spot.textContent = '');
+    Game.updateBoard(spots);
+  };
+
+  return { getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner, resetGame };
 
 }();
 
@@ -115,16 +121,10 @@ function insertEventHandler(event) {
     activePlayer.playRound(buttonIndex);
 
     if (GameController.isWinner()) {
+      createWinnerMessage();
+      const restartButton = document.querySelector('.restart-button');
+      restartButton.addEventListener('click', resetEventHandler);
 
-      const messageBackground = document.createElement('div');
-      messageBackground.classList.add('blur-background');
-
-      const winnerMessage = document.createElement('div');
-      winnerMessage.textContent = `${activePlayer.getName()} has won`;
-      winnerMessage.classList.add('winnerMessage');
-
-      messageBackground.appendChild(winnerMessage);
-      document.body.appendChild(messageBackground);
     }
 
     GameController.switchPlayerTurn();
@@ -140,6 +140,37 @@ function insertEventHandler(event) {
 
 board.addEventListener('click', insertEventHandler);
 
+function resetEventHandler(event) {
+  const messageBackground = document.querySelector('.blur-background');
+  GameController.resetGame();
+  messageBackground.remove();
 
+
+}
+
+
+function createWinnerMessage() {
+  const messageBackground = document.createElement('div');
+  messageBackground.classList.add('blur-background');
+
+  const winnerMessage = document.createElement('div');
+  winnerMessage.classList.add('winnerMessage');
+
+  const restartButton = document.createElement('button');
+  restartButton.textContent = 'Restart';
+  restartButton.classList.add('restart-button');
+
+  const textMessage = document.createElement('span');
+  textMessage.textContent = `${GameController.getActivePlayer().getName()} has won`;
+
+
+  winnerMessage.appendChild(textMessage);
+  winnerMessage.appendChild(restartButton);
+
+  messageBackground.appendChild(winnerMessage);
+
+  document.body.appendChild(messageBackground);
+
+}
 
 
