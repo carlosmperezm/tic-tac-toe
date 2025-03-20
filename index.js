@@ -130,11 +130,15 @@ const DOMController = function() {
     const infoContainer = document.createElement('div');
     const infoMessage = document.createElement('span');
     const restartButton = document.createElement('button');
+    const quitButton = document.createElement('button');
     infoContainer.classList.add('info-container');
     infoMessage.classList.add('info-msg');
     restartButton.classList.add('restart-button');
     restartButton.textContent = 'Restart';
+    quitButton.classList.add('quit-button');
+    quitButton.textContent = 'Quit';
 
+    infoContainer.appendChild(quitButton);
     infoContainer.appendChild(infoMessage);
     infoContainer.appendChild(restartButton);
 
@@ -249,6 +253,9 @@ const EventHandler = function() {
         console.log('jeje');
       }
 
+    }
+    else if (event.target.classList.contains('quit-button')) {
+      window.history.back();
     }
   };
 
