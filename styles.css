@@ -1,10 +1,17 @@
+:root {
+  --background-light: #faf0ca;
+  --background-dark: #0d3b66;
+  --primary-color: #f95738;
+  --secondary-color: #f4d35e;
+  --tertiary-color: #ee964b;
+}
+
 body {
-  background-color: #007;
+  background-color: var(--background-light);
 }
 
 main {
   height: 100vh;
-  /* background-color: Red; */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -50,7 +57,7 @@ button:hover {
 
   top: 50%;
   position: relative;
-  background-color: Gray;
+  background-color: var(--secondary-color);
   width: 100%;
   height: 100px;
   text-align: center;
@@ -61,10 +68,21 @@ button:hover {
   width: 100px;
   height: 40px;
   place-self: center;
+  background-color: var(--primary-color);
+  border-radius: 5px;
+  color: White;
 }
 
 .info-container {
-  background-color: red;
   position: relative;
-  top: 20px;
+  top: 30px;
+  display: flex;
+  justify-content: space-around;
+  gap: 3rem;
+  height: 50px;
+}
+
+.info-container .info-msg {
+  font-size: 2rem;
+  color: var(--tertiary-color);
 }

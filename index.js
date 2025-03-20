@@ -86,9 +86,8 @@ const GameController = function() {
 
   const resetGame = () => {
     const spots = [];
-    // spots.forEach((spot) => spot.remove());
 
-    for (let i = 0; i <= 9; i++) {
+    for (let i = 0; i < 9; i++) {
       const button = document.createElement('button');
       button.dataset.index = i;
       spots.push(button);
@@ -130,9 +129,6 @@ function insertEventHandler(event) {
     if (GameController.isWinner()) {
       createWinnerMessage();
 
-      const restartButton = document.querySelector('.restart-button');
-      restartButton.addEventListener('click', resetEventHandler);
-
     }
 
     GameController.switchPlayerTurn();
@@ -160,9 +156,7 @@ function UpdateInfo() {
 
 function resetEventHandler(event) {
   const messageBackground = document.querySelector('.blur-background');
-  const infoMsg = document.querySelector('.info-msg');
   GameController.resetGame();
-  infoMsg.textContent = '';
   messageBackground.remove();
 
 
@@ -191,6 +185,11 @@ function createWinnerMessage() {
 
   document.body.appendChild(messageBackground);
 
+  restartButton.addEventListener('click', resetEventHandler);
+
 }
 
+UpdateInfo();
 
+const restartButton = document.querySelector('.restart-button');
+restartButton.addEventListener('click', resetEventHandler);
