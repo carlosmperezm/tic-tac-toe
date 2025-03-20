@@ -193,7 +193,7 @@ const DOMController = function() {
   const updateInfo = () => {
     const currentPlayer = GameController.getActivePlayer().getName();
     const infoMsg = document.querySelector('.info-msg');
-    infoMsg.textContent = `${currentPlayer} turn`;
+    infoMsg.textContent = `${currentPlayer}'s turn`;
   };
 
   const createMessage = (message, eventHandler) => {
