@@ -124,83 +124,98 @@ function createPlayer(name, symbol) {
 }
 
 
+const DOMController = function() {
 
 
-function insertEventHandler(event) {
-  const activePlayer = GameController.getActivePlayer();
-  const buttonTarget = event.target;
-  const buttonIndex = buttonTarget.dataset.index;
+  const updateInfo = () => {
+    const currentSymbol = GameController.getActivePlayer().getSymbol();
+    const infoMsg = document.querySelector('.info-msg');
+    infoMsg.textContent = `${currentSymbol} turn`;
+  };
 
-  try {
-    activePlayer.playRound(buttonIndex);
+  const createMessage = (message) => {
+    const messageBackground = document.createElement('div');
+    messageBackground.classList.add('blur-background');
 
-    if (GameController.isWinner()) {
-      const winMessage = `${GameController.getActivePlayer().getSymbol()} takes the round`;
-      createMessage(winMessage);
+    const winnerMessage = document.createElement('div');
+    winnerMessage.classList.add('winnerMessage');
+
+    const restartButton = document.createElement('button');
+    restartButton.textContent = 'Restart';
+    restartButton.classList.add('restart-button');
+
+    const textMessage = document.createElement('span');
+    textMessage.textContent = message;
+
+
+    winnerMessage.appendChild(textMessage);
+    winnerMessage.appendChild(restartButton);
+
+    messageBackground.appendChild(winnerMessage);
+
+    document.body.appendChild(messageBackground);
+
+    restartButton.addEventListener('click', eventHandler.resetEventHandler);
+
+  };
+
+  return { updateInfo, createMessage };
+
+}();
+
+const eventHandler = function() {
+
+  const resetEventHandler = (event) => {
+    const messageBackground = document.querySelector('.blur-background');
+    GameController.resetGame();
+    messageBackground.remove();
+  };
+
+  const insertEventHandler = (event) => {
+    const activePlayer = GameController.getActivePlayer();
+    const buttonTarget = event.target;
+    const buttonIndex = buttonTarget.dataset.index;
+
+    try {
+      activePlayer.playRound(buttonIndex);
+
+      if (GameController.isWinner()) {
+        const winMessage = `${GameController.getActivePlayer().getSymbol()} takes the round`;
+        DOMController.createMessage(winMessage);
+      }
+      else if (GameController.isTie()) {
+        const tieMessage = 'It\'s a tie';
+        DOMController.createMessage(tieMessage);
+      }
+
+      GameController.switchPlayerTurn();
+      DOMController.updateInfo();
+
+    } catch (e) {
+      console.log(e);
     }
-    else if (GameController.isTie()) {
-      const tieMessage = 'It\'s a tie';
-      createMessage(tieMessage);
-    }
 
-    GameController.switchPlayerTurn();
-    UpdateInfo();
+  };
 
-  } catch (e) {
-    console.log(e);
-  }
+  return { insertEventHandler, resetEventHandler };
 
-}
+}();
 
 
 
-board.addEventListener('click', insertEventHandler);
-
-
-function UpdateInfo() {
-  const currentSymbol = GameController.getActivePlayer().getSymbol();
-  const infoMsg = document.querySelector('.info-msg');
-  infoMsg.textContent = `${currentSymbol} turn`;
-}
 
 
 
-function resetEventHandler(event) {
-  const messageBackground = document.querySelector('.blur-background');
-  GameController.resetGame();
-  messageBackground.remove();
+board.addEventListener('click', eventHandler.insertEventHandler);
 
 
-}
 
 
-function createMessage(message) {
-  const messageBackground = document.createElement('div');
-  messageBackground.classList.add('blur-background');
-
-  const winnerMessage = document.createElement('div');
-  winnerMessage.classList.add('winnerMessage');
-
-  const restartButton = document.createElement('button');
-  restartButton.textContent = 'Restart';
-  restartButton.classList.add('restart-button');
-
-  const textMessage = document.createElement('span');
-  textMessage.textContent = message;
 
 
-  winnerMessage.appendChild(textMessage);
-  winnerMessage.appendChild(restartButton);
 
-  messageBackground.appendChild(winnerMessage);
 
-  document.body.appendChild(messageBackground);
-
-  restartButton.addEventListener('click', resetEventHandler);
-
-}
-
-UpdateInfo();
+DOMController.updateInfo();
 
 const restartButton = document.querySelector('.restart-button');
-restartButton.addEventListener('click', resetEventHandler);
+restartButton.addEventListener('click', eventHandler.resetEventHandler);
