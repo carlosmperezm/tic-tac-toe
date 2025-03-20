@@ -1,6 +1,10 @@
 
 const board = document.querySelector('.board');
 
+
+
+
+// Game 
 const Game = function(board) {
   const spots = board.querySelectorAll('button');
 
@@ -17,6 +21,8 @@ const Game = function(board) {
 }(board);
 
 
+
+//Game Controller
 const GameController = function() {
 
   const players = [
@@ -48,8 +54,6 @@ const GameController = function() {
 
     newSpots[spotIndex].textContent = symbol;
 
-
-
     Game.updateBoard(newSpots);
 
   };
@@ -71,9 +75,9 @@ const GameController = function() {
 
     for (const line in options) {
 
-      if (options[line][0].textContent === getActivePlayer().getSymbol() &&
-        options[line][1].textContent === getActivePlayer().getSymbol() &&
-        options[line][2].textContent === getActivePlayer().getSymbol())
+      if (options[line][0].textContent === activePlayer.getSymbol() &&
+        options[line][1].textContent === activePlayer.getSymbol() &&
+        options[line][2].textContent === activePlayer.getSymbol())
         return true;
     }
     return false;
@@ -82,6 +86,8 @@ const GameController = function() {
   return { getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner };
 
 }();
+
+
 
 
 function createPlayer(name, symbol) {
@@ -98,26 +104,6 @@ function createPlayer(name, symbol) {
 }
 
 
-function checkWinnerInTheLine(line) {
-  let index = 0;
-  console.log(line);
-
-  while (line[index].textContent !== 'X' || line[index].textContent !== 'O') {
-    index++;
-  }
-
-  const symbol = line[index].textContent;
-
-
-  for (const content of line)
-    if (content.textContent !== symbol) return false;
-
-  return true;
-
-}
-
-
-
 
 
 function insertEventHandler(event) {
@@ -125,12 +111,21 @@ function insertEventHandler(event) {
   const buttonTarget = event.target;
   const buttonIndex = buttonTarget.dataset.index;
 
-
   try {
     activePlayer.playRound(buttonIndex);
 
-    if (GameController.isWinner())
-      alert(`${activePlayer.getName()} has won `);
+    if (GameController.isWinner()) {
+
+      const messageBackground = document.createElement('div');
+      messageBackground.classList.add('blur-background');
+
+      const winnerMessage = document.createElement('div');
+      winnerMessage.textContent = `${activePlayer.getName()} has won`;
+      winnerMessage.classList.add('winnerMessage');
+
+      messageBackground.appendChild(winnerMessage);
+      document.body.appendChild(messageBackground);
+    }
 
     GameController.switchPlayerTurn();
 
@@ -141,4 +136,10 @@ function insertEventHandler(event) {
 
 }
 
+
+
 board.addEventListener('click', insertEventHandler);
+
+
+
+
