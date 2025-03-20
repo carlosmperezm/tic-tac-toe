@@ -244,7 +244,7 @@ const EventHandler = function() {
 
 
     if (player1Symbol === player2Symbol) {
-      DOMController.createMessage('You have to choose different symbols', () => window.history.back());
+      DOMController.createMessage('You have to choose different symbols', () => location.reload());
       return;
     }
 
@@ -257,9 +257,12 @@ const EventHandler = function() {
   };
 
   const resetEventHandler = (event) => {
+
     if (event.target.classList.contains('restart-button')) {
+
       const messageBackground = document.querySelector('.blur-background');
       GameController.resetGame();
+
       try {
         messageBackground.remove();
 
@@ -269,7 +272,7 @@ const EventHandler = function() {
 
     }
     else if (event.target.classList.contains('quit-button')) {
-      window.history.back();
+      location.reload();
     }
   };
 
