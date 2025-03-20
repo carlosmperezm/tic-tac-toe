@@ -1,36 +1,38 @@
 
-const board = document.querySelector('.board');
-
-
-
-
 // Game 
-const Game = function(board) {
-  const spots = board.querySelectorAll('button');
+const Game = function() {
 
-  const getBoard = () => board;
-  const getSpots = () => spots;
+  const getBoard = () => DOMController.getBoard();
+  const getSpots = () => DOMController.getSpots();
 
   const updateBoard = (newSpots) => {
-    spots.forEach((element) => element.remove());
+    getSpots().forEach((element) => element.remove());
+    const board = document.querySelector('.board');
     newSpots.forEach((element) => board.appendChild(element));
   };
 
   return { getBoard, updateBoard, getSpots };
 
-}(board);
+}();
 
 
 
 //Game Controller
 const GameController = function() {
+  const players = [];
 
-  const players = [
-    createPlayer('player1', 'X'),
-    createPlayer('player2', 'O'),
-  ];
 
-  let activePlayer = players[0];
+  let activePlayer;
+
+  const addPlayers = (player1, player2) => {
+
+    players.push(player1);
+    players.push(player2);
+
+    activePlayer = player1.getSymbol() === 'X' ? player1 : player2;
+
+    console.log(player1.getName());
+  };
 
   const switchPlayerTurn = () => activePlayer = activePlayer === players[0] ? players[1] : players[0];
 
@@ -38,8 +40,7 @@ const GameController = function() {
 
 
   const validateSpot = (spotIndex) => {
-    const boardSpots = Game.getSpots();
-
+    const boardSpots = document.querySelectorAll('.board button');
 
     if (boardSpots[spotIndex].textContent === 'X' || boardSpots[spotIndex].textContent === 'O')
       return false;
@@ -83,7 +84,20 @@ const GameController = function() {
     return false;
   };
 
-  return { getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner };
+  const isTie = () => {
+    const spots = Game.getSpots();
+    for (const spot of spots) {
+      if (spot.textContent === '') return false;
+    }
+    return true;
+  };
+
+  const resetGame = () => {
+    const spots = DOMController.createSpots();
+    Game.updateBoard(spots);
+  };
+
+  return { addPlayers, getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner, isTie, resetGame };
 
 }();
 
@@ -104,42 +118,199 @@ function createPlayer(name, symbol) {
 }
 
 
+const DOMController = function() {
+  const board = document.createElement('div');
+  const restartButton = document.createElement('button');
+  const main = document.querySelector('main');
+
+  board.classList.add('board');
+
+  restartButton.classList.add('restart-button');
 
 
-function insertEventHandler(event) {
-  const activePlayer = GameController.getActivePlayer();
-  const buttonTarget = event.target;
-  const buttonIndex = buttonTarget.dataset.index;
 
-  try {
-    activePlayer.playRound(buttonIndex);
+  const createInfoElement = () => {
+    const infoContainer = document.createElement('div');
+    const infoMessage = document.createElement('span');
+    const restartButton = document.createElement('button');
+    const quitButton = document.createElement('button');
+    infoContainer.classList.add('info-container');
+    infoMessage.classList.add('info-msg');
+    restartButton.classList.add('restart-button');
+    restartButton.textContent = 'Restart';
+    quitButton.classList.add('quit-button');
+    quitButton.textContent = 'Quit';
 
-    if (GameController.isWinner()) {
+    const currentPlayer = GameController.getActivePlayer().getName();
+    infoMessage.textContent = `${currentPlayer}'s turn`;
 
-      const messageBackground = document.createElement('div');
-      messageBackground.classList.add('blur-background');
+    infoContainer.appendChild(quitButton);
+    infoContainer.appendChild(infoMessage);
+    infoContainer.appendChild(restartButton);
 
-      const winnerMessage = document.createElement('div');
-      winnerMessage.textContent = `${activePlayer.getName()} has won`;
-      winnerMessage.classList.add('winnerMessage');
+    main.appendChild(infoContainer);
 
-      messageBackground.appendChild(winnerMessage);
-      document.body.appendChild(messageBackground);
+  };
+
+
+
+  const deleteForm = () => form.remove();
+
+  const getForm = () => document.querySelector('form');
+
+  const getRestartButton = () => document.querySelector('.restart-button');
+
+  const createBoard = () => {
+    createInfoElement();
+    createSpots().forEach((sport) => board.appendChild(sport));
+    main.appendChild(board);
+  };
+
+  const getSubmitButton = () => form.querySelector('button.start-game');
+
+
+  const getInputValue = (inputId) => {
+    const input = document.querySelector(`#${inputId}`);
+    return input.value;
+  };
+
+  const createSpots = () => {
+    const buttonList = [];
+    for (let i = 0; i < 9; i++) {
+      const button = document.createElement('button');
+      button.dataset.index = i;
+      buttonList.push(button);
+
+    }
+    return buttonList;
+  };
+
+
+  const getSpots = () => board.querySelectorAll('.board button');
+
+  const getBoard = () => board;
+
+  const updateInfo = () => {
+    const currentPlayer = GameController.getActivePlayer().getName();
+    const infoMsg = document.querySelector('.info-msg');
+    infoMsg.textContent = `${currentPlayer} turn`;
+  };
+
+  const createMessage = (message, eventHandler) => {
+    const messageBackground = document.createElement('div');
+    messageBackground.classList.add('blur-background');
+
+    const winnerMessage = document.createElement('div');
+    winnerMessage.classList.add('winnerMessage');
+
+    const restartButton = document.createElement('button');
+    restartButton.textContent = 'Restart';
+    restartButton.classList.add('restart-button');
+
+    const textMessage = document.createElement('span');
+    textMessage.textContent = message;
+
+
+    winnerMessage.appendChild(textMessage);
+    winnerMessage.appendChild(restartButton);
+
+    messageBackground.appendChild(winnerMessage);
+
+    document.body.appendChild(messageBackground);
+
+    restartButton.addEventListener('click', eventHandler);
+
+  };
+
+
+
+  return { getRestartButton, updateInfo, createMessage, getBoard, createSpots, getSpots, getForm, getInputValue, createBoard, deleteForm, getSubmitButton };
+
+}();
+
+const EventHandler = function() {
+
+  const formEventHandler = (event) => {
+    event.preventDefault();
+
+    const player1Name = DOMController.getInputValue('player1-name');
+    const player1Symbol = DOMController.getInputValue('player1-symbols');
+
+    const player2Name = DOMController.getInputValue('player2-name');
+    const player2Symbol = DOMController.getInputValue('player2-symbols');
+
+    const player1 = createPlayer(player1Name, player1Symbol);
+    const player2 = createPlayer(player2Name, player2Symbol);
+
+
+    if (player1Symbol === player2Symbol) {
+      DOMController.createMessage('You have to choose different symbols', () => window.history.back());
+      return;
     }
 
-    GameController.switchPlayerTurn();
+    GameController.addPlayers(player1, player2);
 
-  } catch (e) {
-    alert('Choose another spot');
-  }
-
-
-}
+    DOMController.deleteForm();
+    DOMController.createBoard();
 
 
+  };
 
-board.addEventListener('click', insertEventHandler);
+  const resetEventHandler = (event) => {
+    if (event.target.classList.contains('restart-button')) {
+      const messageBackground = document.querySelector('.blur-background');
+      GameController.resetGame();
+      try {
+        messageBackground.remove();
+
+      } catch (e) {
+        console.log('jeje');
+      }
+
+    }
+    else if (event.target.classList.contains('quit-button')) {
+      window.history.back();
+    }
+  };
+
+  const insertEventHandler = (event) => {
+    const activePlayer = GameController.getActivePlayer();
+    const buttonTarget = event.target;
+    const buttonIndex = buttonTarget.dataset.index;
+
+
+    try {
+      activePlayer.playRound(buttonIndex);
+
+      if (GameController.isWinner()) {
+        const winMessage = `${GameController.getActivePlayer().getName()} takes the round`;
+        DOMController.createMessage(winMessage, EventHandler.resetEventHandler);
+      }
+      else if (GameController.isTie()) {
+        const tieMessage = 'It\'s a tie';
+        DOMController.createMessage(tieMessage, EventHandler.resetEventHandler);
+      }
+
+      GameController.switchPlayerTurn();
+      DOMController.updateInfo();
+
+    } catch (e) {
+      console.log(e);
+    }
+
+  };
+
+  return { insertEventHandler, resetEventHandler, formEventHandler };
+
+}();
 
 
 
+const form = DOMController.getForm();
 
+form.addEventListener('submit', EventHandler.formEventHandler);
+
+
+DOMController.getBoard().addEventListener('click', EventHandler.insertEventHandler);
+
+document.body.addEventListener('click', EventHandler.resetEventHandler);
