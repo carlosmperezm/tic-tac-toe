@@ -1,27 +1,33 @@
 
-const Game = function() {
-  let board = [
-    [' ', ' ', ' '],
-    [' ', ' ', ' '],
-    [' ', ' ', ' '],
-  ];
+const board = document.querySelector('.board');
+
+
+
+
+// Game 
+const Game = function(board) {
+  const spots = board.querySelectorAll('button');
 
   const getBoard = () => board;
+  const getSpots = () => spots;
 
-  const displayBoard = () => board.map((row) => console.log(row));
+  const updateBoard = (newSpots) => {
+    spots.forEach((element) => element.remove());
+    newSpots.forEach((element) => board.appendChild(element));
+  };
 
-  const updateBoard = (newBoard) => board = newBoard;
+  return { getBoard, updateBoard, getSpots };
+
+}(board);
 
 
-  return { getBoard, displayBoard, updateBoard };
-}();
 
-
+//Game Controller
 const GameController = function() {
 
   const players = [
-    { name: 'Player 1', score: 0 },
-    { name: 'Player 2', score: 0 },
+    createPlayer('player1', 'X'),
+    createPlayer('player2', 'O'),
   ];
 
   let activePlayer = players[0];
@@ -30,75 +36,58 @@ const GameController = function() {
 
   const getActivePlayer = () => activePlayer;
 
-  const getSpotIndexes = (spot) => {
-    let row = 0;
-    let column = spot - 1;
 
-    if (4 <= spot && spot <= 6) {
-      row = 1;
-      column = spot - 4;
-    }
-    else if (7 <= spot && spot <= 10) {
-      row = 2;
-      column = spot - 7;
-    }
-    return { row, column };
+  const validateSpot = (spotIndex) => {
+    const boardSpots = Game.getSpots();
 
-  };
 
-  const validateSpot = (spot) => {
-    const row = getSpotIndexes(spot).row;
-    const column = getSpotIndexes(spot).column;
-    const board = Game.getBoard();
-
-    if (board[row][column] === 'X' || board[row][column] === 'O')
+    if (boardSpots[spotIndex].textContent === 'X' || boardSpots[spotIndex].textContent === 'O')
       return false;
-    return 0 < spot < 10;
+    return 0 < spotIndex < 10;
   };
 
-  const playRound = (spot, symbol) => {
+  const changeSpotContent = (spotIndex, symbol) => {
 
-    if (!validateSpot(spot)) return console.log(`Spot ${spot} not valid`);
+    if (!validateSpot(spotIndex)) throw Error(`Spot ${spotIndex} not valid`);
 
-    const newBoard = Game.getBoard();
+    const newSpots = Game.getSpots();
 
-    if (4 <= spot && spot <= 6) {
-      newBoard[1][spot - 4] = symbol;
-    }
-    else if (7 <= spot && spot <= 10) {
-      newBoard[2][spot - 7] = symbol;
-    }
-    else if (1 <= spot && spot <= 3) {
-      newBoard[0][spot - 1] = symbol;
-    }
+    newSpots[spotIndex].textContent = symbol;
 
-    Game.updateBoard(newBoard);
+    Game.updateBoard(newSpots);
 
   };
 
   const isWinner = () => {
-    const board = Game.getBoard();
+    const spots = Game.getSpots();
+
     // Validating lines
     const options = {
-      row1: [board[0][0], board[0][1], board[0][2]],
-      row2: [board[1][0], board[1][1], board[1][2]],
-      row3: [board[2][0], board[2][1], board[2][2]],
-      column1: [board[0][0], board[1][0], board[2][0]],
-      column2: [board[0][1], board[1][1], board[2][1]],
-      column3: [board[0][2], board[1][2], board[2][2]],
-      diagonal1: [board[0][0], board[1][1], board[2][2]],
-      diagonal2: [board[2][0], board[1][1], board[0][2]],
+      row1: [spots[0], spots[1], spots[2]],
+      row2: [spots[3], spots[4], spots[5]],
+      row3: [spots[6], spots[7], spots[8]],
+      column1: [spots[0], spots[3], spots[6]],
+      column2: [spots[1], spots[4], spots[7]],
+      column3: [spots[6], spots[7], spots[8]],
+      diagonal1: [spots[0], spots[4], spots[8]],
+      diagonal2: [spots[2], spots[4], spots[6]],
     };
-    for (const key in options) {
-      if (checkWinnerInTheLine(options[key])) {
-        console.log(`There was a winner in line: ${options[key]}`);
-      }
+
+    for (const line in options) {
+
+      if (options[line][0].textContent === activePlayer.getSymbol() &&
+        options[line][1].textContent === activePlayer.getSymbol() &&
+        options[line][2].textContent === activePlayer.getSymbol())
+        return true;
     }
+    return false;
   };
 
-  return { getActivePlayer, playRound, isWinner };
+  return { getActivePlayer, switchPlayerTurn, changeSpotContent, isWinner };
 
 }();
+
+
 
 
 function createPlayer(name, symbol) {
@@ -106,8 +95,8 @@ function createPlayer(name, symbol) {
   const getName = () => name;
   const getSymbol = () => symbol;
 
-  const playRound = (spot) => {
-    GameController.playRound(spot, symbol);
+  const playRound = (spotIndex) => {
+    GameController.changeSpotContent(spotIndex, symbol);
   };
 
   return { getName, getSymbol, playRound };
@@ -116,47 +105,41 @@ function createPlayer(name, symbol) {
 
 
 
-const player1 = createPlayer('player1', 'X');
 
-let position = 1;
-player1.playRound(position);
-position = 4;
-player1.playRound(position);
+function insertEventHandler(event) {
+  const activePlayer = GameController.getActivePlayer();
+  const buttonTarget = event.target;
+  const buttonIndex = buttonTarget.dataset.index;
 
+  try {
+    activePlayer.playRound(buttonIndex);
 
+    if (GameController.isWinner()) {
 
-const player2 = createPlayer('player2', 'O');
+      const messageBackground = document.createElement('div');
+      messageBackground.classList.add('blur-background');
 
-position = 3;
-player2.playRound(position);
-position = 6;
-player2.playRound(position);
+      const winnerMessage = document.createElement('div');
+      winnerMessage.textContent = `${activePlayer.getName()} has won`;
+      winnerMessage.classList.add('winnerMessage');
 
-position = 7;
-player1.playRound(position);
+      messageBackground.appendChild(winnerMessage);
+      document.body.appendChild(messageBackground);
+    }
 
+    GameController.switchPlayerTurn();
 
-position = 9;
-player2.playRound(position);
-
-Game.displayBoard();
-
-
-function checkWinnerInTheLine(line) {
-  let index = 0;
-
-  while (line[index] === ' ') {
-    index++;
+  } catch (e) {
+    alert('Choose another spot');
   }
-  const symbol = line[index];
 
-
-  for (const content of line)
-    if (content !== symbol) return false;
-
-  return true;
 
 }
 
-GameController.isWinner();
+
+
+board.addEventListener('click', insertEventHandler);
+
+
+
 
